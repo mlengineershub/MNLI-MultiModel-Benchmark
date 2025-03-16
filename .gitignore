@@ -172,3 +172,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Jupiter notebook
+*.ipynb
+
+# JSONL Files
+*.jsonl
+
+# .DS_Store files
+.DS_Store
