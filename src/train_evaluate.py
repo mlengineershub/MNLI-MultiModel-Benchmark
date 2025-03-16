@@ -120,6 +120,12 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
     """
     print(f"Training and evaluating {model_name}...")
     
+    # Create directories for this model type
+    model_dir = f"models/{model_name}"
+    results_dir = f"results/{model_name}"
+    os.makedirs(model_dir, exist_ok=True)
+    os.makedirs(results_dir, exist_ok=True)
+    
     # Generate hyperparameter combinations
     hyperparameter_combinations = generate_hyperparameter_combinations(model_config)
     print(f"Generated {len(hyperparameter_combinations)} hyperparameter combinations")
@@ -129,6 +135,9 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
     best_params = None
     best_accuracy = 0.0
     best_results = None
+    
+    # Initialize list to store all results
+    all_results = []
     
     # Train and evaluate each combination
     for i, params in enumerate(hyperparameter_combinations):
@@ -160,6 +169,32 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
         
         print(f"Accuracy: {accuracy:.4f}, Training time: {train_time:.2f}s")
         
+        # Generate unique identifier for this model version
+        param_str = '_'.join([f"{k}_{v}" for k, v in params.items()])
+        model_filename = f"{model_name}_{param_str}.pkl"
+        cm_filename = f"confusion_matrix_{param_str}.png"
+        
+        # Save this model version
+        model.save(f"{model_dir}/{model_filename}")
+        
+        # Save confusion matrix
+        plot_confusion_matrix(
+            results['confusion_matrix'],
+            classes=['neutral', 'entailment', 'contradiction'],
+            title=f'{model_name.capitalize()} Confusion Matrix',
+            save_path=f"{results_dir}/{cm_filename}"
+        )
+        
+        # Store results
+        result_entry = {
+            'params': params,
+            'accuracy': accuracy,
+            'model_path': f"{model_dir}/{model_filename}",
+            'confusion_matrix_path': f"{results_dir}/{cm_filename}",
+            'training_time': train_time
+        }
+        all_results.append(result_entry)
+        
         # Update best model if current is better
         if accuracy > best_accuracy:
             best_accuracy = accuracy
@@ -167,16 +202,9 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
             best_params = params
             best_results = results
             
-            # Save best model
-            os.makedirs('models', exist_ok=True)
-            model.save(f"models/{model_name}_best.pkl")
-            
-            # Save confusion matrix
-            plot_confusion_matrix(
-                results['confusion_matrix'],
-                classes=['neutral', 'entailment', 'contradiction'],
-                title=f'{model_name.capitalize()} Confusion Matrix'
-            )
+    # Save all results to CSV
+    results_df = pd.DataFrame(all_results)
+    results_df.to_csv(f"{results_dir}/all_results.csv", index=False)
     
     print(f"Best {model_name} model:")
     print(f"Parameters: {best_params}")
@@ -184,7 +212,7 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
     
     return best_model, best_params, best_results
 
-def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blues):
+def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blues, save_path=None):
     """
     Plot confusion matrix
     
@@ -193,6 +221,7 @@ def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blu
         classes (list): Class names
         title (str): Plot title
         cmap: Colormap
+        save_path (str): Path to save the figure
     """
     plt.figure(figsize=(10, 8))
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
@@ -214,8 +243,12 @@ def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blu
     plt.xlabel('Predicted label')
     
     # Save the figure
-    os.makedirs('results', exist_ok=True)
-    plt.savefig(f"results/{title.lower().replace(' ', '_')}.png")
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
+    else:
+        os.makedirs('results', exist_ok=True)
+        plt.savefig(f"results/{title.lower().replace(' ', '_')}.png")
     plt.close()
 
 def main(config_path='config/configuration.yaml', train_path='data/train.csv', 
