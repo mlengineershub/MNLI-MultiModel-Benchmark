@@ -173,11 +173,18 @@ class DecisionTreeModel:
     
     def save(self, model_dir):
         """Save model components to disk"""
-        timestamp = time.strftime("%Y%m%d_%H%M")
-        save_dir = os.path.join(model_dir, timestamp)
+        # Extract model parameters for filename
+        param_str = "_".join([f"{k}={v}" for k, v in self.config.items() if not isinstance(v, list)])
+        
+        # Create directory
+        save_dir = os.path.dirname(model_dir)
         os.makedirs(save_dir, exist_ok=True)
         
-        model_path = os.path.join(save_dir, 'model.pkl')
+        # Extract filename from model_dir
+        filename = os.path.basename(model_dir)
+        
+        # Save model with descriptive filename
+        model_path = model_dir
         joblib.dump({
             'model': self.model,
             'vectorizer': self.fitted_vectorizer,

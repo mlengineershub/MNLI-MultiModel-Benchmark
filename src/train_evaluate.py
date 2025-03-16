@@ -169,16 +169,15 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
         
         print(f"Accuracy: {accuracy:.4f}, Training time: {train_time:.2f}s")
         
-        # Create unique identifier for this model
-        timestamp = int(time.time())
-        model_id = f"{timestamp}_{i}"
+        # Create descriptive filename based on model parameters
+        param_str = "_".join([f"{k}={v}" for k, v in params.items() if not isinstance(v, list)])
         
-        # Save model with unique filename
-        model_filename = f"{model_dir}/model_{model_id}.pkl"
+        # Save model with descriptive filename
+        model_filename = f"{model_dir}/model_{model_name}_{param_str}.pkl"
         model.save(model_filename)
         
-        # Save confusion matrix
-        cm_filename = f"{results_dir}/confusion_matrix_{model_id}.png"
+        # Save confusion matrix with descriptive filename
+        cm_filename = f"{results_dir}/confusion_matrix_{model_name}_{param_str}.png"
         plt.figure(figsize=(8, 6))
         sns.heatmap(results['confusion_matrix'], annot=True, fmt='d', cmap='Blues')
         plt.title(f'{model_name.capitalize()} Confusion Matrix')

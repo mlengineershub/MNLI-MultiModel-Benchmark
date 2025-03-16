@@ -494,6 +494,10 @@ class TfidfModel(nn.Module):
         Args:
             filepath (str): Path to save the model
         """
+        # Extract model parameters for filename
+        param_str = "_".join([f"{k}={v}" for k, v in self.config.items() if not isinstance(v, list) and k not in ['max_sequence_length', 'vocab_size', 'batch_size', 'validation_split', 'early_stopping_patience']])
+        
+        # Save model with descriptive filename
         torch.save({
             'model_state_dict': self.state_dict(),
             'config': self.config,

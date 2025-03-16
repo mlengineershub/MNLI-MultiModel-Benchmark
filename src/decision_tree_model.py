@@ -199,15 +199,20 @@ class DecisionTreeModel:
         Args:
             base_path (str): Base directory path to save models and results
         """
-        # Create timestamped directory
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        save_dir = os.path.join(base_path, timestamp)
+        # Extract model parameters for filename
+        param_str = f"max_depth={self.max_depth}_min_samples_split={self.min_samples_split}_max_features={self.max_features}"
+        
+        # Create directory with parameters in name
+        save_dir = os.path.dirname(base_path)
         os.makedirs(save_dir, exist_ok=True)
         
-        # Save individual models
-        joblib.dump(self.text_pipeline, os.path.join(save_dir, 'text_model.pkl'))
-        joblib.dump(self.assertion_pipeline, os.path.join(save_dir, 'assertion_model.pkl'))
-        joblib.dump(self.combined_pipeline, os.path.join(save_dir, 'combined_model.pkl'))
+        # Extract filename from base_path
+        filename = os.path.basename(base_path)
+        
+        # Save individual models with descriptive names
+        joblib.dump(self.text_pipeline, os.path.join(save_dir, f'text_{filename}'))
+        joblib.dump(self.assertion_pipeline, os.path.join(save_dir, f'assertion_{filename}'))
+        joblib.dump(self.combined_pipeline, os.path.join(save_dir, f'combined_{filename}'))
         
         # Save metadata
         joblib.dump({
