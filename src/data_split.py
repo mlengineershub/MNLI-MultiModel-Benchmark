@@ -171,6 +171,12 @@ dev1_df = dev1_df.sample(frac=1)
 dev2_df = dev2_df.sample(frac=1)
 test_df = test_df.sample(frac=1)
 
+# Drop na values
+train_df.dropna(inplace=True)
+dev1_df.dropna(inplace=True)
+dev2_df.dropna(inplace=True)
+test_df.dropna(inplace=True)
+
 # Step 10 : Save the dataframes
 train_df.to_csv("data/train.csv", index=False)
 dev1_df.to_csv("data/dev1.csv", index=False)
