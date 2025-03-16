@@ -6,17 +6,19 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 
 # Load the data
-def load_data():
+def load_data(dataset):
     print("Loading data...")
-    train_data = pd.read_csv('data/train.csv')
-    print(f"Dataset shape: {train_data.shape}")
-    return train_data
+    data = pd.read_csv(f'data/{dataset}.csv')
+    print(f"Dataset shape: {data.shape}")
+    return data
 
 # Preprocess the data
 def preprocess_data(data):
     print("Preprocessing data...")
     # Create a new feature by combining text and assertion
     data['combined_text'] = data['text'] + ' ' + data['assertion']
+    # Handle missing values
+    data['combined_text'] = data['combined_text'].fillna('')
     return data
 
 # Train the decision model (Md)
@@ -163,7 +165,7 @@ def evaluate_cascade(data, md_model, mp_model, mn_model):
 # Main function
 def main():
     # Load and preprocess the data
-    data = load_data()
+    data = load_data("train")
     data = preprocess_data(data)
     
     # Train the models
@@ -172,7 +174,10 @@ def main():
     mn_model = train_negative_model(data)
     
     # Evaluate the cascade model
-    evaluate_cascade(data, md_model, mp_model, mn_model)
+    evaluate_data = load_data("test")
+    evaluate_data = preprocess_data(evaluate_data)
+    
+    evaluate_cascade(evaluate_data, md_model, mp_model, mn_model)
     
     print("Cascade model implementation completed!")
 
