@@ -180,7 +180,7 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
         cm_filename = f"{results_dir}/confusion_matrix_{model_name}_{param_str}.png"
         plt.figure(figsize=(8, 6))
         sns.heatmap(results['confusion_matrix'], annot=True, fmt='d', cmap='Blues')
-        plt.title(f'{model_name.capitalize()} Confusion Matrix')
+        plt.title(f'{model_name.capitalize()} Confusion Matrix (Accuracy: {accuracy:.4f})')
         plt.xlabel('Predicted')
         plt.ylabel('Actual')
         plt.savefig(cm_filename)

@@ -201,14 +201,19 @@ class DecisionTreeModel:
             'classification_report': report
         }
     
-    def plot_confusion_matrix(self, cm, title='Confusion Matrix', save_dir=None):
+    def plot_confusion_matrix(self, cm, accuracy=None, title='Confusion Matrix', save_dir=None):
         plt.figure(figsize=(10, 8))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                    xticklabels=list(self.label_map.keys()),
                    yticklabels=list(self.label_map.keys()))
         plt.xlabel('Predicted')
         plt.ylabel('True')
-        plt.title(title)
+        
+        # Include accuracy in the title if provided
+        if accuracy is not None:
+            plt.title(f'{title} (Accuracy: {accuracy:.4f})')
+        else:
+            plt.title(title)
         
         if save_dir:
             os.makedirs(save_dir, exist_ok=True)

@@ -166,12 +166,13 @@ class DecisionTreeModel:
             'classification_report': report
         }
     
-    def plot_confusion_matrix(self, cm, title='Decision Tree Confusion Matrix', save_dir=None):
+    def plot_confusion_matrix(self, cm, accuracy=None, title='Decision Tree Confusion Matrix', save_dir=None):
         """
         Plot confusion matrix
         
         Args:
             cm (numpy.ndarray): Confusion matrix
+            accuracy (float, optional): Model accuracy to include in the title
             title (str): Plot title
             save_dir (str): Directory to save the plot
         """
@@ -181,7 +182,12 @@ class DecisionTreeModel:
                    yticklabels=list(self.label_map.keys()))
         plt.xlabel('Predicted')
         plt.ylabel('True')
-        plt.title(title)
+        
+        # Include accuracy in the title if provided
+        if accuracy is not None:
+            plt.title(f'{title} (Accuracy: {accuracy:.4f})')
+        else:
+            plt.title(title)
         
         # Save the figure
         if save_dir:
