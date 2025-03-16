@@ -32,9 +32,6 @@ class BiLSTMAttentionModel:
         self.config = config
         # Use CUDA if available
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # Use MPS (Metal Performance Shaders) if available on Apple devices
-        if torch.backends.mps.is_available():
-            self.device = torch.device('mps')
         print(f"Using device: {self.device}")
         
         # Set model parameters
@@ -304,10 +301,10 @@ class BiLSTMAttentionModel:
             dict: Evaluation metrics
         """
         # Preprocess data
-        text, text_lengths, assertion, assertion_lengths, labels = self.preprocess_data(df)
+        combined, combined_lengths, labels = self.preprocess_data(df)
         
         # Create dataset and dataloader
-        dataset = TensorDataset(text, text_lengths, assertion, assertion_lengths, labels)
+        dataset = TensorDataset(combined, combined_lengths, labels)
         # Use a fixed batch size for evaluation
         dataloader = DataLoader(dataset, batch_size=64)
         
@@ -321,19 +318,19 @@ class BiLSTMAttentionModel:
         with torch.no_grad():
             for batch in dataloader:
                 # Get batch data
-                text, text_lengths, assertion, assertion_lengths, labels = batch
+                combined, combined_lengths, labels = batch
                 
-                # Sort by text length in descending order for pack_padded_sequence
-                text_lengths, sorted_idx = text_lengths.sort(descending=True)
-                text = text[sorted_idx]
+                # Sort by sequence length in descending order for pack_padded_sequence
+                combined_lengths, sorted_idx = combined_lengths.sort(descending=True)
+                combined = combined[sorted_idx]
                 labels = labels[sorted_idx]
                 
                 # Move to device
-                text = text.to(self.device)
-                text_lengths = text_lengths.to(self.device)
+                combined = combined.to(self.device)
+                combined_lengths = combined_lengths.to(self.device)
                 
                 # Forward pass
-                outputs = self.model(text, text_lengths)
+                outputs = self.model(combined, combined_lengths)
                 
                 # Get predictions
                 _, preds = torch.max(outputs, 1)

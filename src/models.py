@@ -64,23 +64,41 @@ class Tokenizer:
         Args:
             special_tokens (dict): Dictionary of special tokens to add
         """
-        # Get current max index
-        max_index = max(self.word_index.values()) if self.word_index else 0
+        if not self.num_words:
+            # If no vocabulary size limit, just add tokens
+            max_index = max(self.word_index.values()) if self.word_index else 0
+            for i, (token_name, token) in enumerate(special_tokens.items()):
+                idx = max_index + i + 1
+                self.word_index[token] = idx
+                self.index_word[idx] = token
+                self.word_counts[token] = float('inf')
+            return
         
-        # Add special tokens within vocabulary size limit
-        for i, (token_name, token) in enumerate(special_tokens.items()):
-            # Assign indices starting from current max + 1
-            idx = max_index + i + 1
+        # Calculate how many words we need to remove to make space
+        num_to_remove = len(special_tokens) - (self.num_words - len(self.word_index))
+        
+        if num_to_remove > 0:
+            # Remove least frequent words to make space
+            sorted_words = sorted(self.word_counts.items(), key=lambda x: x[1])
+            words_to_remove = [word for word, count in sorted_words[:num_to_remove] 
+                             if word not in special_tokens.values()]
             
-            # Ensure index is within vocabulary size
-            if self.num_words is not None and idx >= self.num_words:
-                raise ValueError(
-                    f"Cannot add special token {token} - would exceed vocabulary size of {self.num_words}"
-                )
-            
-            self.word_index[token] = idx
-            self.index_word[idx] = token
-            self.word_counts[token] = float('inf')  # Special tokens have infinite count
+            for word in words_to_remove:
+                if word in self.word_index:
+                    idx = self.word_index.pop(word)
+                    self.index_word.pop(idx)
+                    self.word_counts.pop(word)
+        
+        # Add special tokens
+        for token_name, token in special_tokens.items():
+            if token not in self.word_index:
+                # Find first available index
+                idx = next(i for i in range(1, self.num_words + 1) 
+                          if i not in self.index_word)
+                
+                self.word_index[token] = idx
+                self.index_word[idx] = token
+                self.word_counts[token] = float('inf')
 
 class DecisionTreeModel:
     """Decision Tree model for NLI with MLflow tracking"""
