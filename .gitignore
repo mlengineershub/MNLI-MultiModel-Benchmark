@@ -181,15 +181,3 @@ cython_debug/
 
 # .DS_Store files
 .DS_Store
-
-# ignore all .png files
-*.png
-
-# ignore all .jpg files
-*.jpg
-
-# ignore all .jpeg files
-*.jpeg
-
-# ignore all .pkl files
-*.pkl
