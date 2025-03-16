@@ -169,28 +169,30 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
         
         print(f"Accuracy: {accuracy:.4f}, Training time: {train_time:.2f}s")
         
-        # Generate unique identifier for this model version
-        param_str = '_'.join([f"{k}_{v}" for k, v in params.items()])
-        model_filename = f"{model_name}_{param_str}.pkl"
-        cm_filename = f"confusion_matrix_{param_str}.png"
+        # Create unique identifier for this model
+        timestamp = int(time.time())
+        model_id = f"{timestamp}_{i}"
         
-        # Save this model version
-        model.save(f"{model_dir}/{model_filename}")
+        # Save model with unique filename
+        model_filename = f"{model_dir}/model_{model_id}.pkl"
+        model.save(model_filename)
         
         # Save confusion matrix
-        plot_confusion_matrix(
-            results['confusion_matrix'],
-            classes=['neutral', 'entailment', 'contradiction'],
-            title=f'{model_name.capitalize()} Confusion Matrix',
-            save_path=f"{results_dir}/{cm_filename}"
-        )
+        cm_filename = f"{results_dir}/confusion_matrix_{model_id}.png"
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(results['confusion_matrix'], annot=True, fmt='d', cmap='Blues')
+        plt.title(f'{model_name.capitalize()} Confusion Matrix')
+        plt.xlabel('Predicted')
+        plt.ylabel('Actual')
+        plt.savefig(cm_filename)
+        plt.close()
         
-        # Store results
+        # Store results with file paths
         result_entry = {
             'params': params,
             'accuracy': accuracy,
-            'model_path': f"{model_dir}/{model_filename}",
-            'confusion_matrix_path': f"{results_dir}/{cm_filename}",
+            'model_file': model_filename,
+            'confusion_matrix': cm_filename,
             'training_time': train_time
         }
         all_results.append(result_entry)
@@ -211,45 +213,6 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
     print(f"Accuracy: {best_accuracy:.4f}")
     
     return best_model, best_params, best_results
-
-def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blues, save_path=None):
-    """
-    Plot confusion matrix
-    
-    Args:
-        cm (numpy.ndarray): Confusion matrix
-        classes (list): Class names
-        title (str): Plot title
-        cmap: Colormap
-        save_path (str): Path to save the figure
-    """
-    plt.figure(figsize=(10, 8))
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-    
-    # Add text annotations
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], 'd'),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-    
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    
-    # Save the figure
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(save_path)
-    else:
-        os.makedirs('results', exist_ok=True)
-        plt.savefig(f"results/{title.lower().replace(' ', '_')}.png")
-    plt.close()
 
 def main(config_path='config/configuration.yaml', train_path='data/train.csv', 
          dev_path='data/dev1.csv', models_to_train=None, output_dir='results'):
@@ -308,13 +271,6 @@ def main(config_path='config/configuration.yaml', train_path='data/train.csv',
                 'confusion_matrix': best_results['confusion_matrix'],
                 'classification_report': best_results['classification_report']
             }
-            
-            # Plot confusion matrix
-            plot_confusion_matrix(
-                best_results['confusion_matrix'],
-                classes=['neutral', 'entailment', 'contradiction'],
-                title=f'{model_name.capitalize()} Confusion Matrix'
-            )
     
     # Print summary of results
     print("\nSummary of results:")

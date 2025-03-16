@@ -14,6 +14,7 @@ import os
 import itertools
 from sklearn.feature_extraction.text import TfidfVectorizer
 import joblib
+import time
 
 class Tokenizer:
     """Simple tokenizer for text data"""
@@ -154,26 +155,38 @@ class DecisionTreeModel:
             'classification_report': report
         }
     
-    def plot_confusion_matrix(self, cm):
+    def plot_confusion_matrix(self, cm, title='Confusion Matrix', save_dir=None):
         plt.figure(figsize=(10, 8))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                    xticklabels=list(self.label_map.keys()),
                    yticklabels=list(self.label_map.keys()))
         plt.xlabel('Predicted')
         plt.ylabel('True')
-        plt.title('Confusion Matrix')
-        plt.show()
+        plt.title(title)
+        
+        if save_dir:
+            os.makedirs(save_dir, exist_ok=True)
+            plt.savefig(os.path.join(save_dir, 'confusion_matrix.png'))
+            plt.close()
+        else:
+            plt.show()
     
-    def save(self, filepath):
-        import joblib
+    def save(self, model_dir):
+        """Save model components to disk"""
+        timestamp = time.strftime("%Y%m%d_%H%M")
+        save_dir = os.path.join(model_dir, timestamp)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        model_path = os.path.join(save_dir, 'model.pkl')
         joblib.dump({
             'model': self.model,
             'vectorizer': self.fitted_vectorizer,
             'config': self.config
-        }, filepath)
+        }, model_path)
+        
+        return save_dir
     
     def load(self, filepath):
-        import joblib
         data = joblib.load(filepath)
         self.model = data['model']
         self.fitted_vectorizer = data['vectorizer']

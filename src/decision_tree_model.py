@@ -1,27 +1,28 @@
 """
 @Authors: Ilyes DJERFAF, Nazim KESKES
 
-This module implements a simple Naive Bayes model for NLI.
-It's a simple and easy-to-understand approach that doesn't use CNN or RoBERTa.
+This module implements a Decision Tree model for NLI.
+It's a simple and interpretable approach that doesn't use CNN or RoBERTa.
 """
 
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import joblib
+from datetime import datetime
 
-class NaiveBayesModel:
-    """Simple Naive Bayes model for NLI"""
+class DecisionTreeModel:
+    """Decision Tree model for NLI"""
     
     def __init__(self, config):
         """
-        Initialize the Naive Bayes model
+        Initialize the Decision Tree model
         
         Args:
             config (dict): Configuration parameters
@@ -31,7 +32,9 @@ class NaiveBayesModel:
         self.ngram_range_min = config.get('ngram_range_min', 1)
         self.ngram_range_max = config.get('ngram_range_max', 2)
         self.ngram_range = (self.ngram_range_min, self.ngram_range_max)
-        self.alpha = config.get('alpha', 1.0)  # Smoothing parameter
+        self.max_depth = config.get('max_depth', 5)
+        self.min_samples_split = config.get('min_samples_split', 2)
+        self.criterion = config.get('criterion', 'gini')
         self.label_map = {'neutral': 0, 'entailment': 1, 'contradiction': 2}
         self.label_map_inv = {0: 'neutral', 1: 'entailment', 2: 'contradiction'}
         
@@ -41,7 +44,11 @@ class NaiveBayesModel:
                 max_features=self.max_features,
                 ngram_range=self.ngram_range
             )),
-            ('nb', MultinomialNB(alpha=self.alpha))
+            ('dt', DecisionTreeClassifier(
+                max_depth=self.max_depth,
+                min_samples_split=self.min_samples_split,
+                criterion=self.criterion
+            ))
         ])
         
         self.assertion_pipeline = Pipeline([
@@ -49,7 +56,11 @@ class NaiveBayesModel:
                 max_features=self.max_features,
                 ngram_range=self.ngram_range
             )),
-            ('nb', MultinomialNB(alpha=self.alpha))
+            ('dt', DecisionTreeClassifier(
+                max_depth=self.max_depth,
+                min_samples_split=self.min_samples_split,
+                criterion=self.criterion
+            ))
         ])
         
         # Create a pipeline for combined features
@@ -58,7 +69,11 @@ class NaiveBayesModel:
                 max_features=self.max_features,
                 ngram_range=self.ngram_range
             )),
-            ('nb', MultinomialNB(alpha=self.alpha))
+            ('dt', DecisionTreeClassifier(
+                max_depth=self.max_depth,
+                min_samples_split=self.min_samples_split,
+                criterion=self.criterion
+            ))
         ])
     
     def train_model(self, train_df, dev_df=None, epochs=None, batch_size=None, validation_split=None):
@@ -68,14 +83,14 @@ class NaiveBayesModel:
         Args:
             train_df (pandas.DataFrame): Training data
             dev_df (pandas.DataFrame, optional): Development data
-            epochs (int, optional): Not used for Naive Bayes
-            batch_size (int, optional): Not used for Naive Bayes
-            validation_split (float, optional): Not used for Naive Bayes
+            epochs (int, optional): Not used for Decision Tree
+            batch_size (int, optional): Not used for Decision Tree
+            validation_split (float, optional): Not used for Decision Tree
             
         Returns:
-            dict: Training history (empty for Naive Bayes)
+            dict: Training history (empty for Decision Tree)
         """
-        print("Training Naive Bayes model...")
+        print("Training Decision Tree model...")
         
         # Convert labels to indices
         y_train = train_df['label'].map(self.label_map).values
@@ -93,7 +108,7 @@ class NaiveBayesModel:
         combined_text = train_df['text'] + " [SEP] " + train_df['assertion']
         self.combined_pipeline.fit(combined_text, y_train)
         
-        # Return empty history (not applicable for Naive Bayes)
+        # Return empty history (not applicable for Decision Tree)
         return {}
     
     def predict(self, df):
@@ -151,13 +166,14 @@ class NaiveBayesModel:
             'classification_report': report
         }
     
-    def plot_confusion_matrix(self, cm, title='Naive Bayes Confusion Matrix'):
+    def plot_confusion_matrix(self, cm, title='Decision Tree Confusion Matrix', save_dir=None):
         """
         Plot confusion matrix
         
         Args:
             cm (numpy.ndarray): Confusion matrix
             title (str): Plot title
+            save_dir (str): Directory to save the plot
         """
         plt.figure(figsize=(10, 8))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
@@ -168,25 +184,39 @@ class NaiveBayesModel:
         plt.title(title)
         
         # Save the figure
-        os.makedirs('results', exist_ok=True)
-        plt.savefig(f"results/{title.lower().replace(' ', '_')}.png")
+        if save_dir:
+            os.makedirs(save_dir, exist_ok=True)
+            plt.savefig(os.path.join(save_dir, f"{title.lower().replace(' ', '_')}.png"))
+        else:
+            os.makedirs('results', exist_ok=True)
+            plt.savefig(f"results/{title.lower().replace(' ', '_')}.png")
         plt.close()
     
-    def save(self, filepath):
+    def save(self, base_path):
         """
-        Save the model
+        Save all models and results
         
         Args:
-            filepath (str): Path to save the model
+            base_path (str): Base directory path to save models and results
         """
+        # Create timestamped directory
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        save_dir = os.path.join(base_path, timestamp)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        # Save individual models
+        joblib.dump(self.text_pipeline, os.path.join(save_dir, 'text_model.pkl'))
+        joblib.dump(self.assertion_pipeline, os.path.join(save_dir, 'assertion_model.pkl'))
+        joblib.dump(self.combined_pipeline, os.path.join(save_dir, 'combined_model.pkl'))
+        
+        # Save metadata
         joblib.dump({
-            'text_pipeline': self.text_pipeline,
-            'assertion_pipeline': self.assertion_pipeline,
-            'combined_pipeline': self.combined_pipeline,
             'config': self.config,
             'label_map': self.label_map,
             'label_map_inv': self.label_map_inv
-        }, filepath)
+        }, os.path.join(save_dir, 'metadata.pkl'))
+        
+        return save_dir
     
     def load(self, filepath):
         """

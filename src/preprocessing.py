@@ -172,7 +172,14 @@ class TfidfModel(nn.Module):
         super().__init__()
         self.config = config
         self.max_features = config.get('max_features', 10000)
-        self.ngram_range = config.get('ngram_range', (1, 2))
+        
+        # Ensure ngram_range is a tuple
+        ngram_range = config.get('ngram_range', (1, 2))
+        if isinstance(ngram_range, str):
+            # Convert string representation to tuple
+            ngram_range = tuple(map(int, ngram_range.strip('()').split(',')))
+        self.ngram_range = ngram_range
+        
         self.preprocessor = TextPreprocessor(
             max_features=self.max_features,
             ngram_range=self.ngram_range
