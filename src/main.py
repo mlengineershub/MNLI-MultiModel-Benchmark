@@ -31,8 +31,8 @@ def parse_args():
                         help='Path to development data')
     
     parser.add_argument('--models', type=str, nargs='+',
-                        default=['naive_bayes'],
-                        help='Models to train and evaluate')
+                        default=None,
+                        help='Models to train and evaluate (if not specified, all models in the config file will be used)')
     
     parser.add_argument('--output_dir', type=str, default='results',
                         help='Directory to save results')
@@ -63,7 +63,13 @@ def main():
     # Run training and evaluation
     if args.train:
         print("Running training and evaluation...")
-        train_evaluate_main()
+        train_evaluate_main(
+            config_path=args.config,
+            train_path=args.train_data,
+            dev_path=args.dev_data,
+            models_to_train=args.models,
+            output_dir=args.output_dir
+        )
     else:
         print("No action specified. Use --train to train and evaluate models.")
         print("For more options, use --help.")

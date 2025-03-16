@@ -62,10 +62,14 @@ class DecisionTreeModel:
             max_depth=config.get('max_depth', 10),
             min_samples_split=config.get('min_samples_split', 2),
             min_samples_leaf=config.get('min_samples_leaf', 1),
-            max_features=config.get('max_features', 'sqrt')
         )
+        
+        tfidf_max_features = 5000
+        if 'tfidf_max_features' in config:
+            tfidf_max_features = config['tfidf_max_features']
+        
         self.vectorizer = TfidfVectorizer(
-            max_features=config.get('max_features', 5000),
+            max_features=tfidf_max_features,
             ngram_range=(1, 2)
         )
         self.label_map = {'neutral': 0, 'entailment': 1, 'contradiction': 2}
@@ -86,7 +90,20 @@ class DecisionTreeModel:
         
         return X, y
     
-    def train(self, train_df, dev_df=None):
+    def train_model(self, train_df, dev_df=None, epochs=None, batch_size=None, validation_split=None):
+        """
+        Train the model
+        
+        Args:
+            train_df (pandas.DataFrame): Training data
+            dev_df (pandas.DataFrame, optional): Development data
+            epochs (int, optional): Not used for Decision Tree
+            batch_size (int, optional): Not used for Decision Tree
+            validation_split (float, optional): Not used for Decision Tree
+            
+        Returns:
+            dict: Training history (empty for Decision Tree)
+        """
         # Preprocess data
         X_train, y_train = self.preprocess_data(train_df)
         
@@ -114,6 +131,9 @@ class DecisionTreeModel:
                 target_names=list(self.label_map.keys()),
                 output_dict=True
             )
+        
+        # Return empty history (not applicable for Decision Tree)
+        return {}
             
     def evaluate(self, df):
         X, y_true = self.preprocess_data(df)
@@ -187,18 +207,26 @@ def create_model(model_name, config):
     if model_name == 'decision_tree':
         return DecisionTreeModel(config)
     elif model_name == 'bilstm_attention':
+        # Set default values if not provided
+        hidden_dim = config.get('lstm_units', 128)
+        n_layers = config.get('n_layers', 1)
+        dropout = config.get('dropout_rate', 0.3)
+        
         return BiLSTMAttention(
-            vocab_size=config['vocab_size'],
-            embedding_dim=config['embedding_dim'],
-            hidden_dim=config['hidden_dim'],
+            vocab_size=config.get('vocab_size', 20000),
+            embedding_dim=config.get('embedding_dim', 300),
+            hidden_dim=hidden_dim,
             output_dim=3,
-            n_layers=config['n_layers'],
+            n_layers=n_layers,
             bidirectional=True,
-            dropout=config['dropout'],
+            dropout=dropout,
             pad_idx=0
         )
-    elif model_name == 'naive_bayes':
-        from naive_bayes_model import NaiveBayesModel
-        return NaiveBayesModel(config)
+    elif model_name == 'transformer':
+        # Transformer model would be implemented here
+        raise NotImplementedError("Transformer model not implemented yet")
+    elif model_name == 'bert':
+        # BERT model would be implemented here
+        raise NotImplementedError("BERT model not implemented yet")
     else:
         raise ValueError(f"Model {model_name} not supported")

@@ -32,7 +32,9 @@ The following models are implemented:
 
 1. **TF-IDF Model**: A simple model that uses TF-IDF features and a neural network classifier.
 2. **Bi-LSTM with Attention**: A bidirectional LSTM model with attention mechanism.
-3. **Naive Bayes Model**: A simple and interpretable model that uses TF-IDF features with Multinomial Naive Bayes classifiers.
+3. **Decision Tree Model**: A simple and interpretable model that uses TF-IDF features with a decision tree classifier.
+4. **Transformer Model**: A transformer-based model (implementation in progress).
+5. **BERT Model**: A BERT-based model (implementation in progress).
 
 ## Configuration
 
@@ -85,10 +87,9 @@ python src/main.py --train --train_data path/to/train.csv --dev_data path/to/dev
 
 ### Results
 
-The results of the training and evaluation are saved in the `results/` directory. For each model, the following files are generated:
-- A confusion matrix plot
-- The best model weights (saved as .pt files)
-- A summary of the results
+The results of the training and evaluation are saved in the following directories:
+- `results/`: Contains confusion matrix plots and evaluation metrics
+- `models/`: Contains the best model weights (saved as .pkl files)
 
 ## Evaluation Metrics
 

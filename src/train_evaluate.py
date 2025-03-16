@@ -169,7 +169,14 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
             
             # Save best model
             os.makedirs('models', exist_ok=True)
-            model.save(f"models/{model_name}_best.pt")
+            model.save(f"models/{model_name}_best.pkl")
+            
+            # Save confusion matrix
+            plot_confusion_matrix(
+                results['confusion_matrix'],
+                classes=['neutral', 'entailment', 'contradiction'],
+                title=f'{model_name.capitalize()} Confusion Matrix'
+            )
     
     print(f"Best {model_name} model:")
     print(f"Parameters: {best_params}")
@@ -211,18 +218,28 @@ def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blu
     plt.savefig(f"results/{title.lower().replace(' ', '_')}.png")
     plt.close()
 
-def main():
-    """Main function to run the training and evaluation process"""
+def main(config_path='config/configuration.yaml', train_path='data/train.csv', 
+         dev_path='data/dev1.csv', models_to_train=None, output_dir='results'):
+    """
+    Main function to run the training and evaluation process
+    
+    Args:
+        config_path (str): Path to the configuration file
+        train_path (str): Path to the training data
+        dev_path (str): Path to the development data
+        models_to_train (list): List of models to train and evaluate
+        output_dir (str): Directory to save results
+    """
     # Start timer
     start_time = time.time()
     
     # Load configuration
-    config = load_config('config/configuration.yaml')
+    config = load_config(config_path)
     common_config = config.get('common', {})
     
     # Load data
     print("Loading data...")
-    train_df, dev_df = load_data('data/train.csv', 'data/dev1.csv')
+    train_df, dev_df = load_data(train_path, dev_path)
     print(f"Loaded {len(train_df)} training samples and {len(dev_df)} development samples")
     
     # Preprocess data
@@ -232,8 +249,17 @@ def main():
     # Train and evaluate models
     results = {}
     
-    # List of models to train and evaluate
-    models_to_train = ['naive_bayes']
+    # If models_to_train is not specified, use all models in the config file
+    if models_to_train is None:
+        models_to_train = list(config.keys())
+        # Remove common section as it's not a model
+        if 'common' in models_to_train:
+            models_to_train.remove('common')
+    
+    print(f"Models to train: {', '.join(models_to_train)}")
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
     
     for model_name in models_to_train:
         if model_name in config:
