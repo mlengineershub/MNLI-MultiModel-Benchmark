@@ -32,6 +32,9 @@ class BiLSTMAttentionModel:
         self.config = config
         # Use CUDA if available
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # Use MPS (Metal Performance Shaders) if available on Apple devices
+        if torch.backends.mps.is_available():
+            self.device = torch.device('mps')
         print(f"Using device: {self.device}")
         
         # Set model parameters

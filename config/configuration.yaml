@@ -23,7 +23,7 @@ bilstm_attention:
   embedding_dim: [100, 200]
   lstm_units: [64]
   learning_rate: [0.001, 0.0005]
-  n_layers: [2]  # Single layer configuration for faster training
+  n_layers: [2]
 
 # Transformer model
 transformer:
@@ -43,5 +43,5 @@ bert:
 decision_tree:
   max_depth: [10, 20]
   min_samples_split: [2, 10]
-  max_features: [0.3, 0.5]  # null means all features, float values are fractions of features
+  max_features: [0.3, 0.5]
   tfidf_max_features: [5000, 10000]
