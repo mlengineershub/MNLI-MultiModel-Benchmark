@@ -31,7 +31,7 @@ class BiLSTMAttentionModel:
         """
         self.config = config
         # Use CUDA if available
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu')
         print(f"Using device: {self.device}")
         
         # Set model parameters

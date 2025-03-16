@@ -184,7 +184,7 @@ class TfidfModel(nn.Module):
             max_features=self.max_features,
             ngram_range=self.ngram_range
         )
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu')
         self.model_built = False
     
     def build_model(self, input_dim):

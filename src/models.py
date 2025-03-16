@@ -15,6 +15,7 @@ import itertools
 from sklearn.feature_extraction.text import TfidfVectorizer
 import joblib
 import time
+from src.bert_model import BERTModel
 
 class Tokenizer:
     """Simple tokenizer for text data"""
@@ -286,7 +287,6 @@ def create_model(model_name, config):
         # Transformer model would be implemented here
         raise NotImplementedError("Transformer model not implemented yet")
     elif model_name == 'bert':
-        # BERT model would be implemented here
-        raise NotImplementedError("BERT model not implemented yet")
+        return BERTModel(config)
     else:
         raise ValueError(f"Model {model_name} not supported")
