@@ -1,0 +1,68 @@
+# Configuration file for NLI models
+# Contains hyperparameters for each model
+
+# Common parameters
+common:
+  max_sequence_length: 100
+  vocab_size: 20000
+  batch_size: 64
+  validation_split: 0.1
+  early_stopping_patience: 3
+
+# TF-IDF model
+tfidf:
+  max_features: [5000, 10000, 20000]
+  ngram_range: [(1, 1), (1, 2), (1, 3)]
+  learning_rate: [0.001, 0.0005, 0.0001]
+  dropout_rate: [0.2, 0.3, 0.4]
+  epochs: [10, 20, 30]
+
+# Bi-LSTM with Attention model
+bilstm_attention:
+  epochs: [10, 20, 30, 50, 100]
+  embedding_dim: [100, 200, 300]
+  lstm_units: [64, 128, 256]
+  dropout_rate: [0.2, 0.3, 0.4, 0.5]
+  learning_rate: [0.001, 0.0005, 0.0001]
+
+# CNN model
+cnn:
+  epochs: [10, 20, 30, 50]
+  embedding_dim: [100, 200, 300]
+  filters: [64, 128, 256]
+  kernel_sizes: [[3, 4, 5], [2, 3, 4], [4, 5, 6]]
+  dropout_rate: [0.2, 0.3, 0.4, 0.5]
+  learning_rate: [0.001, 0.0005, 0.0001]
+
+# Transformer model
+transformer:
+  epochs: [5, 10, 15, 20]
+  embedding_dim: [128, 256, 512]
+  num_heads: [4, 8, 16]
+  ff_dim: [512, 1024, 2048]
+  num_transformer_blocks: [1, 2, 4]
+  dropout_rate: [0.1, 0.2, 0.3]
+  learning_rate: [0.0001, 0.00005, 0.00001]
+
+# BERT model
+bert:
+  epochs: [2, 3, 4, 5]
+  learning_rate: [2e-5, 3e-5, 5e-5]
+  max_sequence_length: [64, 128, 256]
+  batch_size: [16, 32]
+  dropout_rate: [0.1, 0.2, 0.3]
+
+# RoBERTa model
+roberta:
+  epochs: [2, 3, 4, 5]
+  learning_rate: [2e-5, 3e-5, 5e-5]
+  max_sequence_length: [64, 128, 256]
+  batch_size: [16, 32]
+  dropout_rate: [0.1, 0.2, 0.3]
+
+# Naive Bayes model
+naive_bayes:
+  max_features: [5000, 10000, 20000]
+  ngram_range_min: [1, 1, 1]
+  ngram_range_max: [1, 2, 3]
+  alpha: [0.1, 0.5, 1.0, 2.0]
