@@ -50,9 +50,37 @@ class Tokenizer:
             sequence = []
             for word in text.split():
                 if word in self.word_index:
-                    sequence.append(self.word_index[word])
+                    # Ensure the index is within the vocabulary size
+                    idx = self.word_index[word]
+                    if self.num_words is None or idx < self.num_words:
+                        sequence.append(idx)
             sequences.append(sequence)
         return sequences
+
+    def add_special_tokens(self, special_tokens):
+        """
+        Add special tokens to the tokenizer vocabulary
+        
+        Args:
+            special_tokens (dict): Dictionary of special tokens to add
+        """
+        # Get current max index
+        max_index = max(self.word_index.values()) if self.word_index else 0
+        
+        # Add special tokens within vocabulary size limit
+        for i, (token_name, token) in enumerate(special_tokens.items()):
+            # Assign indices starting from current max + 1
+            idx = max_index + i + 1
+            
+            # Ensure index is within vocabulary size
+            if self.num_words is not None and idx >= self.num_words:
+                raise ValueError(
+                    f"Cannot add special token {token} - would exceed vocabulary size of {self.num_words}"
+                )
+            
+            self.word_index[token] = idx
+            self.index_word[idx] = token
+            self.word_counts[token] = float('inf')  # Special tokens have infinite count
 
 class DecisionTreeModel:
     """Decision Tree model for NLI with MLflow tracking"""
@@ -210,15 +238,16 @@ class BiLSTMAttention(nn.Module):
                           hidden_dim, 
                           num_layers=n_layers, 
                           bidirectional=bidirectional, 
-                          dropout=dropout)
+                          dropout=dropout,
+                          batch_first=True)
         self.fc = nn.Linear(hidden_dim * 2, output_dim)
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, text, text_lengths):
         embedded = self.dropout(self.embedding(text))
-        packed_embedded = nn.utils.rnn.pack_padded_sequence(embedded, text_lengths.to('cpu'))
+        packed_embedded = nn.utils.rnn.pack_padded_sequence(embedded, text_lengths.to('cpu'), batch_first=True)
         packed_output, (hidden, cell) = self.rnn(packed_embedded)
-        output, output_lengths = nn.utils.rnn.pad_packed_sequence(packed_output)
+        output, output_lengths = nn.utils.rnn.pad_packed_sequence(packed_output, batch_first=True)
         hidden = self.dropout(torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim=1))
         return self.fc(hidden)
 

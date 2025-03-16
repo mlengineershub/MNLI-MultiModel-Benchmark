@@ -30,10 +30,12 @@ class BiLSTMAttentionModel:
             config (dict): Configuration parameters
         """
         self.config = config
+        # Use CUDA if available
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"Using device: {self.device}")
         
         # Set model parameters
-        self.vocab_size = config.get('vocab_size', 20000)
+        self.vocab_size = config.get('vocab_size', 20000)  # Increase vocabulary size
         self.embedding_dim = config.get('embedding_dim', 300)
         self.hidden_dim = config.get('lstm_units', 128)
         self.n_layers = config.get('n_layers', 1)
@@ -72,18 +74,21 @@ class BiLSTMAttentionModel:
         Returns:
             tuple: Preprocessed data
         """
-        # Combine text and assertion
+        # Add special token for "x" marker
+        self.tokenizer.add_special_tokens({'x_marker': '[X]'})
+        
+        # Combine text and assertion with "x" marker
         texts = df['text'].tolist()
         assertions = df['assertion'].tolist()
+        combined = [f"{text} [X] {assertion}" for text, assertion in zip(texts, assertions)]
         
         # Fit tokenizer on training data if not already fitted
         if not hasattr(self.tokenizer, 'fitted'):
-            self.tokenizer.fit_on_texts(texts + assertions)
+            self.tokenizer.fit_on_texts(combined)
             self.tokenizer.fitted = True
         
-        # Convert text and assertion to sequences
-        text_sequences = self.tokenizer.texts_to_sequences(texts)
-        assertion_sequences = self.tokenizer.texts_to_sequences(assertions)
+        # Convert combined text + [X] + assertion to sequences
+        combined_sequences = self.tokenizer.texts_to_sequences(combined)
         
         # Pad sequences
         max_len = self.config.get('max_sequence_length', 100)
@@ -96,25 +101,27 @@ class BiLSTMAttentionModel:
                 if len(seq) > max_len:
                     padded.append(seq[:max_len])
                     lengths.append(max_len)
+                elif len(seq) == 0:
+                    # Handle empty sequences by adding a single padding token
+                    padded.append([0] * max_len)
+                    lengths.append(max_len)  # Use max_len to ensure proper packing
                 else:
                     padded.append(seq + [0] * (max_len - len(seq)))
                     lengths.append(len(seq))
             return padded, lengths
         
-        text_padded, text_lengths = pad_sequences(text_sequences, max_len)
-        assertion_padded, assertion_lengths = pad_sequences(assertion_sequences, max_len)
+        # Pad combined sequences
+        combined_padded, combined_lengths = pad_sequences(combined_sequences, max_len)
         
         # Convert to tensors
-        text_tensor = torch.LongTensor(text_padded)
-        text_lengths_tensor = torch.LongTensor(text_lengths)
-        assertion_tensor = torch.LongTensor(assertion_padded)
-        assertion_lengths_tensor = torch.LongTensor(assertion_lengths)
+        combined_tensor = torch.LongTensor(combined_padded)
+        combined_lengths_tensor = torch.LongTensor(combined_lengths)
         
         # Convert labels to indices
         labels = df['label'].map(self.label_map).values
         labels_tensor = torch.LongTensor(labels)
         
-        return (text_tensor, text_lengths_tensor, assertion_tensor, assertion_lengths_tensor, labels_tensor)
+        return (combined_tensor, combined_lengths_tensor, labels_tensor)
     
     def train_model(self, train_df, dev_df=None, epochs=10, batch_size=64, validation_split=0.1):
         """
@@ -185,23 +192,23 @@ class BiLSTMAttentionModel:
             
             for batch in train_loader:
                 # Get batch data
-                text, text_lengths, assertion, assertion_lengths, labels = batch
+                combined, combined_lengths, labels = batch
                 
-                # Sort by text length in descending order for pack_padded_sequence
-                text_lengths, sorted_idx = text_lengths.sort(descending=True)
-                text = text[sorted_idx]
+                # Sort by sequence length in descending order for pack_padded_sequence
+                combined_lengths, sorted_idx = combined_lengths.sort(descending=True)
+                combined = combined[sorted_idx]
                 labels = labels[sorted_idx]
                 
                 # Move to device
-                text = text.to(self.device)
-                text_lengths = text_lengths.to(self.device)
+                combined = combined.to(self.device)
+                combined_lengths = combined_lengths.to(self.device)
                 labels = labels.to(self.device)
                 
                 # Zero the parameter gradients
                 optimizer.zero_grad()
                 
                 # Forward pass
-                outputs = self.model(text, text_lengths)
+                outputs = self.model(combined, combined_lengths)
                 
                 # Calculate loss
                 loss = criterion(outputs, labels)
@@ -211,7 +218,7 @@ class BiLSTMAttentionModel:
                 optimizer.step()
                 
                 # Update statistics
-                train_loss += loss.item() * text.size(0)
+                train_loss += loss.item() * combined.size(0)
                 _, predicted = torch.max(outputs, 1)
                 train_total += labels.size(0)
                 train_correct += (predicted == labels).sum().item()
@@ -230,26 +237,26 @@ class BiLSTMAttentionModel:
                 with torch.no_grad():
                     for batch in val_loader:
                         # Get batch data
-                        text, text_lengths, assertion, assertion_lengths, labels = batch
+                        combined, combined_lengths, labels = batch
                         
-                        # Sort by text length in descending order for pack_padded_sequence
-                        text_lengths, sorted_idx = text_lengths.sort(descending=True)
-                        text = text[sorted_idx]
+                        # Sort by sequence length in descending order for pack_padded_sequence
+                        combined_lengths, sorted_idx = combined_lengths.sort(descending=True)
+                        combined = combined[sorted_idx]
                         labels = labels[sorted_idx]
                         
                         # Move to device
-                        text = text.to(self.device)
-                        text_lengths = text_lengths.to(self.device)
+                        combined = combined.to(self.device)
+                        combined_lengths = combined_lengths.to(self.device)
                         labels = labels.to(self.device)
                         
                         # Forward pass
-                        outputs = self.model(text, text_lengths)
+                        outputs = self.model(combined, combined_lengths)
                         
                         # Calculate loss
                         loss = criterion(outputs, labels)
                         
                         # Update statistics
-                        val_loss += loss.item() * text.size(0)
+                        val_loss += loss.item() * combined.size(0)
                         _, predicted = torch.max(outputs, 1)
                         val_total += labels.size(0)
                         val_correct += (predicted == labels).sum().item()
@@ -408,7 +415,7 @@ class BiLSTMAttentionModel:
         self.config = checkpoint['config']
         
         # Update model parameters
-        self.vocab_size = self.config.get('vocab_size', 20000)
+        self.vocab_size = self.config.get('vocab_size', 30000)
         self.embedding_dim = self.config.get('embedding_dim', 300)
         self.hidden_dim = self.config.get('lstm_units', 128)
         self.n_layers = self.config.get('n_layers', 1)

@@ -4,7 +4,7 @@
 # Common parameters
 common:
   max_sequence_length: 100
-  vocab_size: 20000
+  vocab_size: 30000
   batch_size: 64
   validation_split: 0.1
   early_stopping_patience: 3
@@ -19,10 +19,11 @@ tfidf:
 
 # Bi-LSTM with Attention model
 bilstm_attention:
-  epochs: [10, 50]
+  epochs: [10, 30]
   embedding_dim: [100, 200]
-  lstm_units: [64, 128]
+  lstm_units: [64]
   learning_rate: [0.001, 0.0005]
+  n_layers: [2]  # Single layer configuration for faster training
 
 # Transformer model
 transformer:
