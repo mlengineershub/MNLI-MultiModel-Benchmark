@@ -227,21 +227,9 @@ def create_model(model_name, config):
     if model_name == 'decision_tree':
         return DecisionTreeModel(config)
     elif model_name == 'bilstm_attention':
-        # Set default values if not provided
-        hidden_dim = config.get('lstm_units', 128)
-        n_layers = config.get('n_layers', 1)
-        dropout = config.get('dropout_rate', 0.3)
-        
-        return BiLSTMAttention(
-            vocab_size=config.get('vocab_size', 20000),
-            embedding_dim=config.get('embedding_dim', 300),
-            hidden_dim=hidden_dim,
-            output_dim=3,
-            n_layers=n_layers,
-            bidirectional=True,
-            dropout=dropout,
-            pad_idx=0
-        )
+        # Import here to avoid circular imports
+        from bilstm_attention_model import BiLSTMAttentionModel
+        return BiLSTMAttentionModel(config)
     elif model_name == 'transformer':
         # Transformer model would be implemented here
         raise NotImplementedError("Transformer model not implemented yet")
