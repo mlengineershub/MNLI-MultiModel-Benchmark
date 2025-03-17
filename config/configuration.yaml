@@ -11,7 +11,7 @@ common:
 
 # Bi-LSTM with Attention model
 bilstm_attention:
-  epochs: [5]
+  epochs: [5, 10]
   embedding_dim: [100, 200]
   lstm_units: [64]
   learning_rate: [0.001, 0.0005]
