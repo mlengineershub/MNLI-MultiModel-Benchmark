@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="MNLI-Approach",
+    name="MNLI-MultiModel-Benchmark",
     version="0.1.0",
     author="Ilyes DJERFAF, Nazim KESKES",
-    description="A project for Multi Natural Language Inference (MNLI) approach.",
+    description="A project for Multi Natural Language Inference (MNLI) MultiModel Benchmark.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/mlengineershub/NLI-Approach",

@@ -1,6 +1,6 @@
-# Contributing to NLI-Approach
+# Contributing to MNLI-MultiModel-Benchmark
 
-Thank you for your interest in contributing to the Natural Language Inference (NLI) Approach project! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to the Multi Natural Language Inference (MNLI) Approach project! This document provides guidelines and instructions for contributing.
 
 ## Table of Contents
 

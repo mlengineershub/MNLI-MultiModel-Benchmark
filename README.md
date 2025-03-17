@@ -1,6 +1,6 @@
-# Natural Language Inference (NLI) Approach with PyTorch
+# Multi Natural Language Inference (MNLI) MultiModel Benchmark using PyTorch
 
-This project implements various models for Natural Language Inference (NLI) using the MultiNLI dataset with PyTorch. The models are trained to classify pairs of sentences as entailment, contradiction, or neutral.
+This project implements various models for Multi Natural Language Inference (NLI) using the MultiNLI dataset with PyTorch. The models are trained to classify pairs of sentences as entailment, contradiction, or neutral.
 
 ## Project Structure
 
