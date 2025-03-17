@@ -9,14 +9,6 @@ common:
   validation_split: 0.1
   early_stopping_patience: 3
 
-# TF-IDF model
-tfidf:
-  max_features: [5000, 20000]
-  ngram_range: [(1, 1), (1, 2)]
-  learning_rate: [0.001, 0.0005]
-  dropout_rate: [0.2, 0.3]
-  epochs: [10, 20]
-
 # Bi-LSTM with Attention model
 bilstm_attention:
   epochs: [10, 30]
