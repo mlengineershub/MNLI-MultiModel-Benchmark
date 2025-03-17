@@ -9,6 +9,10 @@ It includes:
 - Confusion matrix visualization
 """
 
+# Set matplotlib backend to Agg to avoid GUI dependencies
+import matplotlib
+matplotlib.use('Agg')
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
