@@ -224,7 +224,7 @@ The models are evaluated using the following metrics:
 
 ## Contributing
 
-Please see the [CONTRIBUTE.md](CONTRIBUTE.md) file for guidelines on how to contribute to this project.
+Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to contribute to this project.
 
 ## License
 
