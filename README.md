@@ -24,18 +24,23 @@ This project implements various models for Natural Language Inference (NLI) usin
 │   ├── bilstm_attention/     # BiLSTM with attention models
 │   └── decision_tree/        # Decision tree models with different parameters
 ├── results/                  # Evaluation results
+│   ├── benchmark/            # Model benchmark results and comparison
 │   ├── bilstm_attention/     # BiLSTM results
 │   └── decision_tree/        # Decision tree results and confusion matrices
 ├── src/
 │   ├── __init__.py
+│   ├── benchmark_models.py   # Script for benchmarking models
 │   ├── bert_model.py         # BERT model implementation
 │   ├── bilstm_attention_model.py # BiLSTM with attention implementation
+│   ├── create_dummy_models.py # Utility for creating test models
 │   ├── data_split.py         # Script for splitting data
 │   ├── decision_tree_model.py # Decision tree model implementation
+│   ├── find_and_benchmark.py # Script to find and benchmark models
 │   ├── main.py               # Main script for running the code
 │   ├── models.py             # Model factory and base classes
 │   ├── preprocessing.py      # Data preprocessing utilities
 │   ├── regenerate_confusion_matrices.py # Script to regenerate confusion matrices
+│   ├── run_benchmark.py      # Wrapper for running benchmarks
 │   └── train_evaluate.py     # Training and evaluation code
 ├── CONTRIBUTE.md             # Contribution guidelines
 ├── LICENSE                   # License information
@@ -99,6 +104,38 @@ Each dataset contains the following columns:
 - `label`: The label for the pair of sentences (neutral, entailment, or contradiction)
 - `text`: The premise sentence
 - `assertion`: The hypothesis sentence
+
+## Model Benchmarking
+
+The project includes a benchmarking system to compare different models on the test dataset. The benchmark system:
+
+1. Loads pre-trained models from pickle files
+2. Evaluates them on the test dataset
+3. Generates confusion matrices
+4. Calculates performance metrics
+5. Saves the results to the `results/benchmark/` directory
+
+### Running the Benchmark
+
+To benchmark specific models:
+
+```bash
+python src/run_benchmark.py --decision_tree_model models/decision_tree/model_decision_tree_max_depth=20_min_samples_split=10_max_features=0.5_tfidf_max_features=10000.pkl --bilstm_model models/bilstm_attention/model_bilstm_attention_epochs=5_embedding_dim=200_lstm_units=64_learning_rate=0.001_n_layers=2.pkl
+```
+
+To automatically find and benchmark the most recent models:
+
+```bash
+python src/find_and_benchmark.py
+```
+
+### Benchmark Results
+
+The benchmark results are saved in the `results/benchmark/` directory:
+- `decision_tree_confusion_matrix.png`: Confusion matrix for the Decision Tree model
+- `bilstm_attention_confusion_matrix.png`: Confusion matrix for the BiLSTM model
+- `benchmark_results.csv`: CSV file with accuracy results
+- `README.md`: Documentation of the benchmark system and results
 
 ## Usage
 
