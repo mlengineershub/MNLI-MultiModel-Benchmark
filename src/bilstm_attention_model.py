@@ -13,6 +13,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 from sklearn.metrics import confusion_matrix, classification_report
+# Use Agg backend for matplotlib to avoid GUI dependencies
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
