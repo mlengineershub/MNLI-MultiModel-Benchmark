@@ -369,9 +369,13 @@ class BiLSTMAttentionModel:
             save_dir (str): Directory to save the plot
         """
         plt.figure(figsize=(10, 8))
+        
+        # Use text labels instead of numeric indices
+        label_names = ['neutral', 'entailment', 'contradiction']
+        
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                   xticklabels=list(self.label_map.keys()),
-                   yticklabels=list(self.label_map.keys()))
+                   xticklabels=label_names,
+                   yticklabels=label_names)
         plt.xlabel('Predicted')
         plt.ylabel('True')
         

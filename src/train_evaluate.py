@@ -179,7 +179,14 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
         # Save confusion matrix with descriptive filename
         cm_filename = f"{results_dir}/confusion_matrix_{model_name}_{param_str}.png"
         plt.figure(figsize=(8, 6))
-        sns.heatmap(results['confusion_matrix'], annot=True, fmt='d', cmap='Blues')
+        
+        # Get the label mapping (assuming all models have a label_map attribute)
+        label_names = ['neutral', 'entailment', 'contradiction']
+        
+        # Plot with text labels instead of numeric indices
+        sns.heatmap(results['confusion_matrix'], annot=True, fmt='d', cmap='Blues',
+                   xticklabels=label_names,
+                   yticklabels=label_names)
         plt.title(f'{model_name.capitalize()} Confusion Matrix (Accuracy: {accuracy:.4f})')
         plt.xlabel('Predicted')
         plt.ylabel('Actual')

@@ -21,6 +21,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 from sklearn.metrics import confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
 
 # Download NLTK resources if not already downloaded
 try:
@@ -504,6 +507,41 @@ class TfidfModel(nn.Module):
             'preprocessor': self.preprocessor,
             'input_dim': self.fc1.in_features
         }, filepath)
+    
+    def plot_confusion_matrix(self, cm, accuracy=None, title='TF-IDF Confusion Matrix', save_dir=None):
+        """
+        Plot confusion matrix
+        
+        Args:
+            cm (numpy.ndarray): Confusion matrix
+            accuracy (float, optional): Model accuracy to include in the title
+            title (str): Plot title
+            save_dir (str): Directory to save the plot
+        """
+        plt.figure(figsize=(10, 8))
+        
+        # Use text labels instead of numeric indices
+        label_names = ['neutral', 'entailment', 'contradiction']
+        
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                   xticklabels=label_names,
+                   yticklabels=label_names)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        
+        # Include accuracy in the title if provided
+        if accuracy is not None:
+            plt.title(f'{title} (Accuracy: {accuracy:.4f})')
+        else:
+            plt.title(title)
+        
+        # Save the figure
+        if save_dir:
+            os.makedirs(save_dir, exist_ok=True)
+            plt.savefig(os.path.join(save_dir, f"{title.lower().replace(' ', '_')}.png"))
+            plt.close()
+        else:
+            plt.show()
     
     def load(self, filepath):
         """
