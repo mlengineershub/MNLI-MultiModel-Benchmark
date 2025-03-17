@@ -1,0 +1,38 @@
+# Configuration file for NLI models
+# Contains hyperparameters for each model
+
+# Common parameters
+common:
+  max_sequence_length: 100
+  vocab_size: 30000
+  batch_size: 64
+  validation_split: 0.1
+  early_stopping_patience: 3
+
+# Bi-LSTM model
+bilstm:
+  epochs: [5, 10]
+  embedding_dim: [100, 200]
+  lstm_units: [64]
+  learning_rate: [0.001, 0.0005]
+  n_layers: [2]
+
+# BERT model
+bert:
+  epochs: [2, 5]
+  learning_rate: [1e-4, 2e-4]
+  max_sequence_length: [64, 128]
+  batch_size: [16, 32]
+
+# Decision Tree model
+decision_tree:
+  max_depth: [10, 20]
+  min_samples_split: [2, 10]
+  max_features: [0.3, 0.5]
+  tfidf_max_features: [5000, 10000]
+
+# Cascade model
+cascade:
+  max_depth: [10, 20]
+  min_samples_split: [2, 10]
+  tfidf_max_features: [5000, 10000]
