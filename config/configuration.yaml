@@ -30,3 +30,9 @@ decision_tree:
   min_samples_split: [2, 10]
   max_features: [0.3, 0.5]
   tfidf_max_features: [5000, 10000]
+
+# Cascade model
+cascade:
+  max_depth: [10, 20]
+  min_samples_split: [2, 10]
+  tfidf_max_features: [5000, 10000]

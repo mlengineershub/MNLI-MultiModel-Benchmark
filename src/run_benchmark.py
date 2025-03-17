@@ -2,7 +2,7 @@
 @Authors: Ilyes DJERFAF, Nazim KESKES
 
 This script is a simple wrapper to run the benchmark_models.py script with
-the specified decision tree and BiLSTM model pickle files.
+the specified decision tree, BiLSTM, and cascade model pickle files.
 """
 
 import os
@@ -12,13 +12,16 @@ import subprocess
 def main():
     """Main function"""
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Run benchmark for Decision Tree and BiLSTM models')
+    parser = argparse.ArgumentParser(description='Run benchmark for Decision Tree, BiLSTM, and Cascade models')
     
     parser.add_argument('--decision_tree_model', type=str, required=True,
                         help='Path to the decision tree model pickle file')
     
     parser.add_argument('--bilstm_model', type=str, required=True,
                         help='Path to the BiLSTM model pickle file')
+    
+    parser.add_argument('--cascade_model', type=str, required=True,
+                        help='Path to the cascade model pickle file')
     
     parser.add_argument('--test_data', type=str, default='data/test.csv',
                         help='Path to the test data')
@@ -33,6 +36,7 @@ def main():
         'python', 'src/benchmark_models.py',
         '--decision_tree_model', args.decision_tree_model,
         '--bilstm_model', args.bilstm_model,
+        '--cascade_model', args.cascade_model,
         '--test_data', args.test_data
     ]
     

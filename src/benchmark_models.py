@@ -19,6 +19,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 # Import model classes
 from decision_tree_model import DecisionTreeModel
 from bilstm_attention_model import BiLSTMAttentionModel
+from cascade_model import CascadeModel
 
 def load_data(test_path):
     """
@@ -174,6 +175,103 @@ def load_decision_tree_model(model_path, dummy_mode=False):
             print(f"Error loading decision tree model: {e}")
             print("Falling back to dummy mode")
             return load_decision_tree_model(model_path, dummy_mode=True)
+
+def load_cascade_model(model_path, dummy_mode=False):
+    """
+    Load cascade model from pickle file
+    
+    Args:
+        model_path (str): Path to the model pickle file
+        dummy_mode (bool): Whether to create a dummy model for testing
+        
+    Returns:
+        CascadeModel: Loaded model
+    """
+    if dummy_mode:
+        print("Creating dummy cascade model for testing...")
+        
+        # Create a dummy config
+        config = {
+            'max_depth': 10,
+            'min_samples_split': 2,
+            'tfidf_max_features': 5000
+        }
+        
+        # Create model instance
+        model = CascadeModel(config)
+        
+        # Override evaluate method for testing
+        def dummy_evaluate(self, df):
+            print(f"Dummy evaluation on {len(df)} samples")
+            # Generate random predictions
+            y_true = np.random.randint(0, 3, len(df))
+            y_pred = np.random.randint(0, 3, len(df))
+            
+            # Calculate metrics
+            accuracy = np.mean(y_pred == y_true)
+            cm = confusion_matrix(y_true, y_pred)
+            
+            # Create classification report
+            report = {
+                'neutral': {'precision': 0.68, 'recall': 0.65, 'f1-score': 0.66},
+                'entailment': {'precision': 0.65, 'recall': 0.68, 'f1-score': 0.66},
+                'contradiction': {'precision': 0.66, 'recall': 0.66, 'f1-score': 0.66},
+            }
+            
+            return {
+                'accuracy': accuracy,
+                'confusion_matrix': cm,
+                'classification_report': report
+            }
+        
+        # Attach the dummy evaluate method to the model instance
+        model.evaluate = dummy_evaluate.__get__(model)
+        
+        return model
+    else:
+        print(f"Loading cascade model from {model_path}...")
+        
+        try:
+            # Create a dummy config to initialize the model
+            config = {
+                'max_depth': 10,
+                'min_samples_split': 2,
+                'tfidf_max_features': 5000
+            }
+            
+            # Create model instance
+            model = CascadeModel(config)
+            
+            # Load model from pickle file
+            try:
+                model.load(model_path)
+            except Exception as e:
+                print(f"Error with standard loading: {e}")
+                print("Trying alternative loading method...")
+                
+                # Try to load the model directly
+                data = joblib.load(model_path)
+                
+                # Check if it's a dictionary with expected keys
+                if isinstance(data, dict) and 'md_model' in data and 'mp_model' in data and 'mn_model' in data:
+                    # Override the model's attributes
+                    model.md_model = data['md_model']
+                    model.mp_model = data['mp_model']
+                    model.mn_model = data['mn_model']
+                    if 'config' in data:
+                        model.config = data['config']
+                    if 'label_map' in data:
+                        model.label_map = data['label_map']
+                    if 'label_map_inv' in data:
+                        model.label_map_inv = data['label_map_inv']
+                else:
+                    raise ValueError("Model file has unexpected format")
+            
+            return model
+        except Exception as e:
+            print(f"Error loading cascade model: {e}")
+            print("Falling back to dummy mode")
+            return load_cascade_model(model_path, dummy_mode=True)
 
 def load_bilstm_model(model_path, dummy_mode=False):
     """
@@ -417,6 +515,9 @@ def main():
     parser.add_argument('--bilstm_model', type=str, required=True,
                         help='Path to the BiLSTM model pickle file')
     
+    parser.add_argument('--cascade_model', type=str, required=True,
+                        help='Path to the cascade model pickle file')
+    
     parser.add_argument('--test_data', type=str, default='data/test.csv',
                         help='Path to the test data')
     
@@ -439,10 +540,12 @@ def main():
     # Load models
     dt_model = load_decision_tree_model(args.decision_tree_model, args.dummy_mode)
     bilstm_model = load_bilstm_model(args.bilstm_model, args.dummy_mode)
+    cascade_model = load_cascade_model(args.cascade_model, args.dummy_mode)
     
     # Evaluate models
     dt_results = evaluate_model(dt_model, test_df, "Decision Tree")
     bilstm_results = evaluate_model(bilstm_model, test_df, "BiLSTM")
+    cascade_results = evaluate_model(cascade_model, test_df, "Cascade")
     
     # Plot and save confusion matrices
     plot_confusion_matrix(
@@ -459,27 +562,36 @@ def main():
         os.path.join(args.output_dir, 'bilstm_attention_confusion_matrix.png')
     )
     
+    plot_confusion_matrix(
+        cascade_results['confusion_matrix'],
+        cascade_results['accuracy'],
+        'Cascade Confusion Matrix',
+        os.path.join(args.output_dir, 'cascade_confusion_matrix.png')
+    )
+    
     # Print comparison summary
     print("\nModel Comparison Summary:")
     print(f"Decision Tree Accuracy: {dt_results['accuracy']:.4f}")
     print(f"BiLSTM Accuracy: {bilstm_results['accuracy']:.4f}")
-    print(f"Accuracy Difference: {abs(dt_results['accuracy'] - bilstm_results['accuracy']):.4f}")
+    print(f"Cascade Accuracy: {cascade_results['accuracy']:.4f}")
     
-    # Determine which model performed better
-    if dt_results['accuracy'] > bilstm_results['accuracy']:
-        print("Decision Tree model performed better on the test set")
-    elif bilstm_results['accuracy'] > dt_results['accuracy']:
-        print("BiLSTM model performed better on the test set")
-    else:
-        print("Both models performed equally on the test set")
+    # Find the best model
+    accuracies = {
+        'Decision Tree': dt_results['accuracy'],
+        'BiLSTM': bilstm_results['accuracy'],
+        'Cascade': cascade_results['accuracy']
+    }
+    best_model = max(accuracies, key=accuracies.get)
+    print(f"\nBest model: {best_model} with accuracy {accuracies[best_model]:.4f}")
     
     # Save results to CSV
     results_df = pd.DataFrame({
-        'Model': ['Decision Tree', 'BiLSTM'],
-        'Accuracy': [dt_results['accuracy'], bilstm_results['accuracy']],
+        'Model': ['Decision Tree', 'BiLSTM', 'Cascade'],
+        'Accuracy': [dt_results['accuracy'], bilstm_results['accuracy'], cascade_results['accuracy']],
         'Confusion Matrix File': [
             os.path.join(args.output_dir, 'decision_tree_confusion_matrix.png'),
-            os.path.join(args.output_dir, 'bilstm_attention_confusion_matrix.png')
+            os.path.join(args.output_dir, 'bilstm_attention_confusion_matrix.png'),
+            os.path.join(args.output_dir, 'cascade_confusion_matrix.png')
         ]
     })
     

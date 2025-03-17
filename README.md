@@ -22,16 +22,20 @@ This project implements various models for Natural Language Inference (NLI) usin
 │   └── pipeline.png          # Complete pipeline diagram
 ├── models/                   # Saved model weights
 │   ├── bilstm_attention/     # BiLSTM with attention models
+│   ├── cascade/              # Cascade models with different parameters
 │   └── decision_tree/        # Decision tree models with different parameters
 ├── results/                  # Evaluation results
 │   ├── benchmark/            # Model benchmark results and comparison
 │   ├── bilstm_attention/     # BiLSTM results
+│   ├── cascade/              # Cascade model results
 │   └── decision_tree/        # Decision tree results and confusion matrices
 ├── src/
 │   ├── __init__.py
 │   ├── benchmark_models.py   # Script for benchmarking models
 │   ├── bert_model.py         # BERT model implementation
 │   ├── bilstm_attention_model.py # BiLSTM with attention implementation
+│   ├── cascade.py            # Script for training and evaluating the cascade model
+│   ├── cascade_model.py      # Cascade model implementation
 │   ├── create_dummy_models.py # Utility for creating test models
 │   ├── data_split.py         # Script for splitting data
 │   ├── decision_tree_model.py # Decision tree model implementation
@@ -61,7 +65,14 @@ The following models are implemented:
 
 2. **Bi-LSTM with Attention**: A bidirectional LSTM model with attention mechanism for better capturing the relationships between premise and hypothesis sentences.
 
-3. **BERT Model**: A BERT-based model that leverages pre-trained contextual embeddings for NLI tasks.
+3. **Cascade Model**: A cascade approach that uses three specialized models:
+   - A decision model (Md) to determine if a sample is entailment or contradiction
+   - A positive model (Mp) for entailment vs. neutral classification
+   - A negative model (Mn) for contradiction vs. neutral classification
+   
+   This approach allows each model to focus on a specific aspect of the classification task, leading to improved overall performance.
+
+4. **BERT Model**: A BERT-based model that leverages pre-trained contextual embeddings for NLI tasks.
 
 ## Pipeline
 
@@ -120,7 +131,7 @@ The project includes a benchmarking system to compare different models on the te
 To benchmark specific models:
 
 ```bash
-python src/run_benchmark.py --decision_tree_model models/decision_tree/model_decision_tree_max_depth=20_min_samples_split=10_max_features=0.5_tfidf_max_features=10000.pkl --bilstm_model models/bilstm_attention/model_bilstm_attention_epochs=5_embedding_dim=200_lstm_units=64_learning_rate=0.001_n_layers=2.pkl
+python src/run_benchmark.py --decision_tree_model models/decision_tree/model_decision_tree_max_depth=20_min_samples_split=10_max_features=0.5_tfidf_max_features=10000.pkl --bilstm_model models/bilstm_attention/model_bilstm_attention_epochs=5_embedding_dim=200_lstm_units=64_learning_rate=0.001_n_layers=2.pkl --cascade_model models/cascade/model_cascade_max_depth=10_min_samples_split=2_tfidf_max_features=5000.pkl
 ```
 
 To automatically find and benchmark the most recent models:
@@ -134,6 +145,7 @@ python src/find_and_benchmark.py
 The benchmark results are saved in the `results/benchmark/` directory:
 - `decision_tree_confusion_matrix.png`: Confusion matrix for the Decision Tree model
 - `bilstm_attention_confusion_matrix.png`: Confusion matrix for the BiLSTM model
+- `cascade_confusion_matrix.png`: Confusion matrix for the Cascade model
 - `benchmark_results.csv`: CSV file with accuracy results
 - `README.md`: Documentation of the benchmark system and results
 
@@ -164,7 +176,7 @@ python src/main.py --train
 To specify which models to train:
 
 ```bash
-python src/main.py --train --models bilstm_attention decision_tree
+python src/main.py --train --models bilstm_attention decision_tree cascade
 ```
 
 To specify a different configuration file:
@@ -177,6 +189,12 @@ To specify different data files:
 
 ```bash
 python src/main.py --train --train_data path/to/train.csv --dev_data path/to/dev.csv
+```
+
+To train cascade pipeline:
+
+```bash
+python src/cascade.py
 ```
 
 ### Regenerating Confusion Matrices

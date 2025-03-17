@@ -1,3 +1,4 @@
 Model,Accuracy,Confusion Matrix File
 Decision Tree,0.45148068201110814,results/benchmark/decision_tree_confusion_matrix.png
-BiLSTM,0.3346996192185491,results/benchmark/bilstm_attention_confusion_matrix.png
+BiLSTM,0.3332444034828163,results/benchmark/bilstm_attention_confusion_matrix.png
+Cascade,0.44864301132642914,results/benchmark/cascade_confusion_matrix.png

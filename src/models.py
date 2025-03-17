@@ -287,6 +287,10 @@ def create_model(model_name, config):
         # Import here to avoid circular imports
         from bilstm_attention_model import BiLSTMAttentionModel
         return BiLSTMAttentionModel(config)
+    elif model_name == 'cascade':
+        # Import here to avoid circular imports
+        from cascade_model import CascadeModel
+        return CascadeModel(config)
     elif model_name == 'transformer':
         # Transformer model would be implemented here
         raise NotImplementedError("Transformer model not implemented yet")
