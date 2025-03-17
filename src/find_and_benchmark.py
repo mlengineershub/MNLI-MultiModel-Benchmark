@@ -21,7 +21,7 @@ def find_model_files():
     dt_files = glob.glob('models/decision_tree/*.pkl')
     
     # Look for BiLSTM model files
-    bilstm_files = glob.glob('models/bilstm_attention/*.pkl')
+    bilstm_files = glob.glob('models/bilstm/*.pkl')
     
     # Look for cascade model files
     cascade_files = glob.glob('models/cascade/*.pkl')
@@ -32,7 +32,7 @@ def find_model_files():
         return None, None, None
     
     if not bilstm_files:
-        print("No BiLSTM model files found in models/bilstm_attention/")
+        print("No BiLSTM model files found in models/bilstm/")
         return None, None, None
     
     if not cascade_files:

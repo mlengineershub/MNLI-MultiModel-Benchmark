@@ -1,8 +1,8 @@
 """
 @Authors: Ilyes DJERFAF, Nazim KESKES
 
-This module implements a BiLSTM with Attention model for NLI.
-It's a deep learning approach that uses bidirectional LSTM with attention mechanism.
+This module implements a BiLSTM  model for NLI.
+It's a deep learning approach that uses bidirectional LSTM mechanism.
 """
 
 import numpy as np
@@ -13,21 +13,18 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 from sklearn.metrics import confusion_matrix, classification_report
-# Use Agg backend for matplotlib to avoid GUI dependencies
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import time
-from models import BiLSTMAttention, Tokenizer
+from models import BiLSTM, Tokenizer
 
-class BiLSTMAttentionModel:
-    """BiLSTM with Attention model for NLI"""
+class BiLSTMModel:
+    """BiLSTM model for NLI"""
     
     def __init__(self, config):
         """
-        Initialize the BiLSTM with Attention model
+        Initialize the BiLSTM model
         
         Args:
             config (dict): Configuration parameters
@@ -46,7 +43,7 @@ class BiLSTMAttentionModel:
         self.learning_rate = config.get('learning_rate', 0.001)
         
         # Create model
-        self.model = BiLSTMAttention(
+        self.model = BiLSTM(
             vocab_size=self.vocab_size,
             embedding_dim=self.embedding_dim,
             hidden_dim=self.hidden_dim,
@@ -361,7 +358,7 @@ class BiLSTMAttentionModel:
             'classification_report': report
         }
     
-    def plot_confusion_matrix(self, cm, accuracy=None, title='BiLSTM Attention Confusion Matrix', save_dir=None):
+    def plot_confusion_matrix(self, cm, accuracy=None, title='BiLSTM Confusion Matrix', save_dir=None):
         """
         Plot confusion matrix
         
@@ -435,7 +432,7 @@ class BiLSTMAttentionModel:
         self.dropout = self.config.get('dropout_rate', 0.3)
         
         # Recreate model
-        self.model = BiLSTMAttention(
+        self.model = BiLSTM(
             vocab_size=self.vocab_size,
             embedding_dim=self.embedding_dim,
             hidden_dim=self.hidden_dim,
@@ -455,6 +452,9 @@ class BiLSTMAttentionModel:
         # Load tokenizer
         self.tokenizer = checkpoint['tokenizer']
         
+        # Load label maps
+        self.label_map = checkpoint['label_map']
+        self.label_map_inv = checkpoint['label_map_inv']
         # Load label maps
         self.label_map = checkpoint['label_map']
         self.label_map_inv = checkpoint['label_map_inv']

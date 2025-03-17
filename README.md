@@ -21,19 +21,19 @@ This project implements various models for Multi Natural Language Inference (NLI
 │   ├── parameters.png        # Hyperparameter configuration
 │   └── pipeline.png          # Complete pipeline diagram
 ├── models/                   # Saved model weights
-│   ├── bilstm_attention/     # BiLSTM with attention models
+│   ├── bilstm/     # BiLSTM models
 │   ├── cascade/              # Cascade models with different parameters
 │   └── decision_tree/        # Decision tree models with different parameters
 ├── results/                  # Evaluation results
 │   ├── benchmark/            # Model benchmark results and comparison
-│   ├── bilstm_attention/     # BiLSTM results
+│   ├── bilstm/     # BiLSTM results
 │   ├── cascade/              # Cascade model results
 │   └── decision_tree/        # Decision tree results and confusion matrices
 ├── src/
 │   ├── __init__.py
 │   ├── benchmark_models.py   # Script for benchmarking models
 │   ├── bert_model.py         # BERT model implementation
-│   ├── bilstm_attention_model.py # BiLSTM with attention implementation
+│   ├── bilstm_model.py # BiLSTM implementation
 │   ├── cascade.py            # Script for training and evaluating the cascade model
 │   ├── cascade_model.py      # Cascade model implementation
 │   ├── create_dummy_models.py # Utility for creating test models
@@ -63,7 +63,7 @@ The following models are implemented:
    - Max features: 0.3, 0.5
    - TF-IDF max features: 5000, 10000
 
-2. **Bi-LSTM with Attention**: A bidirectional LSTM model with attention mechanism for better capturing the relationships between premise and hypothesis sentences.
+2. **Bi-LSTM**: A bidirectional LSTM model mechanism for better capturing the relationships between premise and hypothesis sentences.
 
 3. **Cascade Model**: A cascade approach that uses three specialized models:
    - A decision model (Md) to determine if a sample is entailment or contradiction
@@ -99,12 +99,12 @@ decision_tree:
   max_features: [0.3, 0.5]
   tfidf_max_features: [5000, 10000]
 
-bilstm_attention:
+bilstm:
+  epochs: [5, 10]
   embedding_dim: [100, 200]
-  hidden_dim: [128, 256]
-  attention_dim: [64, 128]
-  dropout: [0.2, 0.5]
-  epochs: 10
+  lstm_units: [64]
+  learning_rate: [0.001, 0.0005]
+  n_layers: [2]
 ```
 
 ## Data
@@ -131,7 +131,7 @@ The project includes a benchmarking system to compare different models on the te
 To benchmark specific models:
 
 ```bash
-python src/run_benchmark.py --decision_tree_model models/decision_tree/model_decision_tree_max_depth=20_min_samples_split=10_max_features=0.5_tfidf_max_features=10000.pkl --bilstm_model models/bilstm_attention/model_bilstm_attention_epochs=5_embedding_dim=200_lstm_units=64_learning_rate=0.001_n_layers=2.pkl --cascade_model models/cascade/model_cascade_max_depth=10_min_samples_split=2_tfidf_max_features=5000.pkl
+python src/run_benchmark.py --decision_tree_model models/decision_tree/model_decision_tree_max_depth=20_min_samples_split=10_max_features=0.5_tfidf_max_features=10000.pkl --bilstm_model models/bilstm/model_bilstm_epochs=5_embedding_dim=200_lstm_units=64_learning_rate=0.001_n_layers=2.pkl --cascade_model models/cascade/model_cascade_max_depth=10_min_samples_split=2_tfidf_max_features=5000.pkl
 ```
 
 To automatically find and benchmark the most recent models:
@@ -144,7 +144,7 @@ python src/find_and_benchmark.py
 
 The benchmark results are saved in the `results/benchmark/` directory:
 - `decision_tree_confusion_matrix.png`: Confusion matrix for the Decision Tree model
-- `bilstm_attention_confusion_matrix.png`: Confusion matrix for the BiLSTM model
+- `bilstm_confusion_matrix.png`: Confusion matrix for the BiLSTM model
 - `cascade_confusion_matrix.png`: Confusion matrix for the Cascade model
 - `benchmark_results.csv`: CSV file with accuracy results
 - `README.md`: Documentation of the benchmark system and results
@@ -176,7 +176,7 @@ python src/main.py --train
 To specify which models to train:
 
 ```bash
-python src/main.py --train --models bilstm_attention decision_tree cascade
+python src/main.py --train --models bilstm decision_tree cascade
 ```
 
 To specify a different configuration file:

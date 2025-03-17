@@ -120,7 +120,7 @@ def main():
     
     # Create directories if they don't exist
     os.makedirs(os.path.join(args.output_dir, 'decision_tree'), exist_ok=True)
-    os.makedirs(os.path.join(args.output_dir, 'bilstm_attention'), exist_ok=True)
+    os.makedirs(os.path.join(args.output_dir, 'bilstm'), exist_ok=True)
     
     # Create dummy decision tree model
     dt_model = create_dummy_decision_tree()
@@ -144,7 +144,7 @@ def main():
     
     # Create dummy BiLSTM model
     bilstm_model = create_dummy_bilstm()
-    bilstm_path = os.path.join(args.output_dir, 'bilstm_attention', 'dummy_bilstm.pkl')
+    bilstm_path = os.path.join(args.output_dir, 'bilstm', 'dummy_bilstm.pkl')
     
     try:
         torch.save(bilstm_model, bilstm_path)

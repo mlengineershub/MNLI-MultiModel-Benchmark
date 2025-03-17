@@ -18,7 +18,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 
 # Import model classes
 from decision_tree_model import DecisionTreeModel
-from bilstm_attention_model import BiLSTMAttentionModel
+from src.bilstm_model import BiLSTMModel
 from cascade_model import CascadeModel
 
 def load_data(test_path):
@@ -282,7 +282,7 @@ def load_bilstm_model(model_path, dummy_mode=False):
         dummy_mode (bool): Whether to create a dummy model for testing
         
     Returns:
-        BiLSTMAttentionModel: Loaded model
+        BiLSTMModel: Loaded model
     """
     if dummy_mode:
         print("Creating dummy BiLSTM model for testing...")
@@ -298,7 +298,7 @@ def load_bilstm_model(model_path, dummy_mode=False):
         }
         
         # Create model instance
-        model = BiLSTMAttentionModel(config)
+        model = BiLSTMModel(config)
         
         # Override evaluate method for testing
         def dummy_evaluate(self, df):
@@ -343,7 +343,7 @@ def load_bilstm_model(model_path, dummy_mode=False):
             }
             
             # Create model instance
-            model = BiLSTMAttentionModel(config)
+            model = BiLSTMModel(config)
             
             # Load model from pickle file with CPU mapping and weights_only=False
             try:
@@ -558,8 +558,8 @@ def main():
     plot_confusion_matrix(
         bilstm_results['confusion_matrix'],
         bilstm_results['accuracy'],
-        'BiLSTM Attention Confusion Matrix',
-        os.path.join(args.output_dir, 'bilstm_attention_confusion_matrix.png')
+        'BiLSTM Confusion Matrix',
+        os.path.join(args.output_dir, 'bilstm_confusion_matrix.png')
     )
     
     plot_confusion_matrix(
@@ -590,7 +590,7 @@ def main():
         'Accuracy': [dt_results['accuracy'], bilstm_results['accuracy'], cascade_results['accuracy']],
         'Confusion Matrix File': [
             os.path.join(args.output_dir, 'decision_tree_confusion_matrix.png'),
-            os.path.join(args.output_dir, 'bilstm_attention_confusion_matrix.png'),
+            os.path.join(args.output_dir, 'bilstm_confusion_matrix.png'),
             os.path.join(args.output_dir, 'cascade_confusion_matrix.png')
         ]
     })

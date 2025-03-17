@@ -255,8 +255,8 @@ class DecisionTreeModel:
         self.fitted_vectorizer = data['vectorizer']
         self.config = data['config']
 
-class BiLSTMAttention(nn.Module):
-    """Bi-LSTM with Attention model for NLI"""
+class BiLSTM(nn.Module):
+    """Bi-LSTM model for NLI"""
     
     def __init__(self, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, 
                  bidirectional, dropout, pad_idx):
@@ -283,10 +283,10 @@ class BiLSTMAttention(nn.Module):
 def create_model(model_name, config):
     if model_name == 'decision_tree':
         return DecisionTreeModel(config)
-    elif model_name == 'bilstm_attention':
+    elif model_name == 'bilstm':
         # Import here to avoid circular imports
-        from bilstm_attention_model import BiLSTMAttentionModel
-        return BiLSTMAttentionModel(config)
+        from bilstm_model import BiLSTMModel
+        return BiLSTMModel(config)
     elif model_name == 'cascade':
         # Import here to avoid circular imports
         from cascade_model import CascadeModel

@@ -9,8 +9,8 @@ common:
   validation_split: 0.1
   early_stopping_patience: 3
 
-# Bi-LSTM with Attention model
-bilstm_attention:
+# Bi-LSTM model
+bilstm:
   epochs: [5, 10]
   embedding_dim: [100, 200]
   lstm_units: [64]
