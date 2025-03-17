@@ -20,7 +20,6 @@ import time
 import torch
 from sklearn.metrics import confusion_matrix, classification_report
 from models import create_model
-from preprocessing import TfidfModel
 
 def load_config(config_path):
     """
@@ -147,10 +146,7 @@ def train_and_evaluate_model(model_name, model_config, train_df, dev_df, common_
         model_params = {**common_config, **params}
         
         # Create model based on model name
-        if model_name == 'tfidf':
-            model = TfidfModel(model_params)
-        else:
-            model = create_model(model_name, model_params)
+        model = create_model(model_name, model_params)
         
         # Train model
         start_time = time.time()
