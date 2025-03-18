@@ -23,12 +23,12 @@ Please be respectful and considerate of others when contributing to this project
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/mlengineershub/NLI-Approach.git
-   cd NLI-Approach
+   git clone https://github.com/mlengineershub/MNLI-MultiModel-Benchmark
+   cd MNLI-MultiModel-Benchmark
    ```
 3. Set up the upstream remote:
    ```bash
-   git remote add upstream https://github.com/mlengineershub/NLI-Approach.git
+   git remote add upstream https://github.com/mlengineershub/MNLI-MultiModel-Benchmark
    ```
 4. Create a new branch for your feature or bugfix:
    ```bash
