@@ -21,19 +21,19 @@ This project implements various models for Multi Natural Language Inference (NLI
 │   ├── parameters.png        # Hyperparameter configuration
 │   └── pipeline.png          # Complete pipeline diagram
 ├── models/                   # Saved model weights
-│   ├── bilstm/     # BiLSTM models
+│   ├── bilstm/               # BiLSTM models
 │   ├── cascade/              # Cascade models with different parameters
 │   └── decision_tree/        # Decision tree models with different parameters
 ├── results/                  # Evaluation results
 │   ├── benchmark/            # Model benchmark results and comparison
-│   ├── bilstm/     # BiLSTM results
+│   ├── bilstm/               # BiLSTM results
 │   ├── cascade/              # Cascade model results
 │   └── decision_tree/        # Decision tree results and confusion matrices
 ├── src/
 │   ├── __init__.py
 │   ├── benchmark_models.py   # Script for benchmarking models
 │   ├── bert_model.py         # BERT model implementation
-│   ├── bilstm_model.py # BiLSTM implementation
+│   ├── bilstm_model.py       # BiLSTM implementation
 │   ├── cascade.py            # Script for training and evaluating the cascade model
 │   ├── cascade_model.py      # Cascade model implementation
 │   ├── create_dummy_models.py # Utility for creating test models
@@ -159,7 +159,7 @@ Install the required packages:
 pip install -r requirements.txt
 ```
 
-Or install the package in development mode:
+Install the package in development mode:
 
 ```bash
 pip install -e .

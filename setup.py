@@ -7,7 +7,7 @@ setup(
     description="A project for Multi Natural Language Inference (MNLI) MultiModel Benchmark.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/mlengineershub/NLI-Approach",
+    url="https://github.com/mlengineershub/MNLI-MultiModel-Benchmark",
     packages=find_packages(),
     install_requires=[
         "numpy",
